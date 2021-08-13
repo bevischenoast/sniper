@@ -14,6 +14,14 @@ class CachePerfModelParallel : public CachePerfModel
          CachePerfModel(cache_data_access_time, cache_tags_access_time),
          m_enabled(false)
       {}
+      CachePerfModelParallel(const ComponentLatency& cache_data_access_time,
+                             const ComponentLatency& cache_data_write_time_fast,
+                             const ComponentLatency& cache_data_write_time_slow,
+                             const ComponentLatency& cache_tags_access_time) :
+                             CachePerfModel(cache_data_access_time, cache_data_write_time_fast,
+                                            cache_data_write_time_slow, cache_tags_access_time),
+                             m_enabled(false)
+                             {}
       ~CachePerfModelParallel() {}
 
       void enable() { m_enabled = true; }
@@ -33,7 +41,10 @@ class CachePerfModelParallel : public CachePerfModel
             case ACCESS_CACHE_DATA:
             case ACCESS_CACHE_DATA_AND_TAGS:
                return m_cache_data_access_time.getLatency();
-
+            case WRITE_CACHE_DATA_FAST:
+                 return m_cache_data_write_time_fast.getLatency();
+            case WRITE_CACHE_DATA_SLOW:
+                  return m_cache_data_write_time_slow.getLatency();
             default:
                return SubsecondTime::Zero();
          }

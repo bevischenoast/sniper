@@ -853,7 +853,20 @@ CacheCntlr::processShmemReqFromPrevCache(CacheCntlr* requester, Core::mem_op_t m
          }
          else
          {
-            getMemoryManager()->incrElapsedTime(m_mem_component, CachePerfModel::ACCESS_CACHE_DATA_AND_TAGS, ShmemPerfModel::_USER_THREAD);
+             if(m_mem_component == MemComponent::L3_CACHE && mem_op_type == Core::WRITE){
+                 //TODO: For test ONLY !!!
+                 // This assignment statement needs to be removed later
+                 // Note that call core->accessMemory (see common/system/syscall_server.cc line 59 for a usage example)
+                 // can get readl data.
+                 bool isFastWrite = false;
+                     if(isFastWrite){
+                         getMemoryManager()->incrElapsedTime(m_mem_component, CachePerfModel::WRITE_CACHE_DATA_FAST, ShmemPerfModel::_USER_THREAD);
+                     }else{
+                         getMemoryManager()->incrElapsedTime(m_mem_component, CachePerfModel::WRITE_CACHE_DATA_SLOW, ShmemPerfModel::_USER_THREAD);
+                     }
+             }else{
+                 getMemoryManager()->incrElapsedTime(m_mem_component, CachePerfModel::ACCESS_CACHE_DATA_AND_TAGS, ShmemPerfModel::_USER_THREAD);
+             }
          }
       }
 

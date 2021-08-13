@@ -261,6 +261,8 @@ ADDRINT handleMemoryReadFaultinjection(THREADID thread_id, BOOL executing, ADDRI
          assert(localStore[thread_id].dynins);
          localStore[thread_id].dynins->addMemory(executing, memres.latency, read_address, read_data_size, Operand::READ, 0, memres.hit_where);
       }
+      //TODO: Investigate whether *read_address hold real data and
+      // can handleMemoryReadFaultinjection()  can be called in cache_cntlr.cc?.
 
       // Load correct data from real memory
       PIN_SafeCopy(buf_data, (const void*)read_address, read_data_size);

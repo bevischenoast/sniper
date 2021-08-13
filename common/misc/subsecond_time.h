@@ -512,14 +512,23 @@ public:
       return *this;
    }
 
+   ////////////////////////////////////////////////////////////////////////////////////////////
+   //TODO: Fix this identifier issue
+   // If this  constructor marked as private(Like the origin code did),
+   // error: cache_perf_model.cc:7:51: error: 'ComponentLatency::ComponentLatency()' is private within this context
+   //    7 |    m_cache_tags_access_time(cache_tags_access_time)
+   //      |
+   ComponentLatency()
+   : m_period(static_cast<const ComponentPeriod*>(0))
+   {}
+   ////////////////////////////////////////////////////////////////////////////////////////////
    friend inline std::ostream &operator<<(std::ostream &os, const ComponentLatency &time);
+
 private:
    const ComponentPeriod *m_period;
    uint64_t m_fixed_cycle_latency;
 
-   ComponentLatency()
-      : m_period(static_cast<const ComponentPeriod*>(0))
-   {}
+
 };
 
 inline std::ostream &operator<<(std::ostream &os, const ComponentLatency &latency)

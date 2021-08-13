@@ -113,33 +113,66 @@ MemoryManager::MemoryManager(Core* core,
 
          LOG_ASSERT_ERROR(Sim()->getCfg()->getInt("perf_model/" + configName + "/cache_block_size") == m_cache_block_size,
                           "The cache block size of the %s is not the same as the l1_icache (%d)", configName.c_str(), m_cache_block_size);
-
-         cache_parameters[(MemComponent::component_t)i] = CacheParameters(
-            configName,
-            Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/cache_size", core->getId()),
-            Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/associativity", core->getId()),
-            getCacheBlockSize(),
-            Sim()->getCfg()->getStringArray("perf_model/" + configName + "/address_hash", core->getId()),
-            Sim()->getCfg()->getStringArray("perf_model/" + configName + "/replacement_policy", core->getId()),
-            Sim()->getCfg()->getBoolArray(  "perf_model/" + configName + "/perfect", core->getId()),
-            i == MemComponent::L1_ICACHE
-               ? Sim()->getCfg()->getBoolArray(  "perf_model/" + configName + "/coherent", core->getId())
-               : true,
-            ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/data_access_time", core->getId())),
-            ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/tags_access_time", core->getId())),
-            ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/writeback_time", core->getId())),
-            ComponentBandwidthPerCycle(clock_domain,
-               i < (UInt32)m_last_level_cache
-                  ? Sim()->getCfg()->getIntArray("perf_model/" + configName + "/next_level_read_bandwidth", core->getId())
-                  : 0),
-            Sim()->getCfg()->getStringArray("perf_model/" + configName + "/perf_model_type", core->getId()),
-            Sim()->getCfg()->getBoolArray(  "perf_model/" + configName + "/writethrough", core->getId()),
-            Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/shared_cores", core->getId()) * smt_cores,
-            Sim()->getCfg()->getStringArray("perf_model/" + configName + "/prefetcher", core->getId()),
-            i == MemComponent::L1_DCACHE
-               ? Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/outstanding_misses", core->getId())
-               : 0
-         );
+          //Reading STT-MRAM based L3 cache parameter from configure file
+         if(i == MemComponent::L3_CACHE){
+             cache_parameters[(MemComponent::component_t)i] = CacheParameters(
+                     configName,
+                     Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/cache_size", core->getId()),
+                     Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/associativity", core->getId()),
+                     getCacheBlockSize(),
+                     Sim()->getCfg()->getStringArray("perf_model/" + configName + "/address_hash", core->getId()),
+                     Sim()->getCfg()->getStringArray("perf_model/" + configName + "/replacement_policy", core->getId()),
+                     Sim()->getCfg()->getBoolArray(  "perf_model/" + configName + "/perfect", core->getId()),
+                     i == MemComponent::L1_ICACHE
+                     ? Sim()->getCfg()->getBoolArray(  "perf_model/" + configName + "/coherent", core->getId())
+                     : true,
+                     ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/data_access_time", core->getId())),
+                     //Assign asymmetrical access latency for write operation
+                     ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/data_write_time_fast", core->getId())),
+                     ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/data_write_time_slow", core->getId())),
+                     ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/tags_access_time", core->getId())),
+                     ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/writeback_time", core->getId())),
+                     ComponentBandwidthPerCycle(clock_domain,
+                                                i < (UInt32)m_last_level_cache
+                                                ? Sim()->getCfg()->getIntArray("perf_model/" + configName + "/next_level_read_bandwidth", core->getId())
+                                                : 0),
+                                                Sim()->getCfg()->getStringArray("perf_model/" + configName + "/perf_model_type", core->getId()),
+                                                Sim()->getCfg()->getBoolArray(  "perf_model/" + configName + "/writethrough", core->getId()),
+                                                Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/shared_cores", core->getId()) * smt_cores,
+                                                Sim()->getCfg()->getStringArray("perf_model/" + configName + "/prefetcher", core->getId()),
+                                                i == MemComponent::L1_DCACHE
+                                                ? Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/outstanding_misses", core->getId())
+                                                : 0
+                                                );
+         }else{
+             //For other levels of SRAM based cache
+             cache_parameters[(MemComponent::component_t)i] = CacheParameters(
+                     configName,
+                     Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/cache_size", core->getId()),
+                     Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/associativity", core->getId()),
+                     getCacheBlockSize(),
+                     Sim()->getCfg()->getStringArray("perf_model/" + configName + "/address_hash", core->getId()),
+                     Sim()->getCfg()->getStringArray("perf_model/" + configName + "/replacement_policy", core->getId()),
+                     Sim()->getCfg()->getBoolArray(  "perf_model/" + configName + "/perfect", core->getId()),
+                     i == MemComponent::L1_ICACHE
+                     ? Sim()->getCfg()->getBoolArray(  "perf_model/" + configName + "/coherent", core->getId())
+                     : true,
+                     ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/data_access_time", core->getId())),
+                     ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/tags_access_time", core->getId())),
+                     ComponentLatency(clock_domain, Sim()->getCfg()->getIntArray("perf_model/" + configName + "/writeback_time", core->getId())),
+                     ComponentBandwidthPerCycle(clock_domain,
+                                                i < (UInt32)m_last_level_cache
+                                                ? Sim()->getCfg()->getIntArray("perf_model/" + configName + "/next_level_read_bandwidth", core->getId())
+                                                : 0),
+                                                Sim()->getCfg()->getStringArray("perf_model/" + configName + "/perf_model_type", core->getId()),
+                                                Sim()->getCfg()->getBoolArray(  "perf_model/" + configName + "/writethrough", core->getId()),
+                                                Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/shared_cores", core->getId()) * smt_cores,
+                                                Sim()->getCfg()->getStringArray("perf_model/" + configName + "/prefetcher", core->getId()),
+                                                i == MemComponent::L1_DCACHE
+                                                ? Sim()->getCfg()->getIntArray(   "perf_model/" + configName + "/outstanding_misses", core->getId())
+                                                : 0
+                                                );
+         }
          cache_names[(MemComponent::component_t)i] = objectName;
 
          /* Non-application threads will be distributed at 1 per process, probably not as shared_cores per process.
@@ -309,12 +342,24 @@ MemoryManager::MemoryManager(Core* core,
    }
 
    // Create Performance Models
-   for(UInt32 i = MemComponent::FIRST_LEVEL_CACHE; i <= (UInt32)m_last_level_cache; ++i)
-      m_cache_perf_models[(MemComponent::component_t)i] = CachePerfModel::create(
-       cache_parameters[(MemComponent::component_t)i].perf_model_type,
-       cache_parameters[(MemComponent::component_t)i].data_access_time,
-       cache_parameters[(MemComponent::component_t)i].tags_access_time
-      );
+   for(UInt32 i = MemComponent::FIRST_LEVEL_CACHE; i <= (UInt32)m_last_level_cache; ++i){
+       if(i == MemComponent::L3_CACHE){
+           m_cache_perf_models[(MemComponent::component_t)i] = CachePerfModel::create(
+                   cache_parameters[(MemComponent::component_t)i].perf_model_type,
+                   cache_parameters[(MemComponent::component_t)i].data_access_time,
+                   cache_parameters[(MemComponent::component_t)i].data_write_time_fast,
+                   cache_parameters[(MemComponent::component_t)i].data_write_time_slow,
+                   cache_parameters[(MemComponent::component_t)i].tags_access_time
+                   );
+       }else{
+           m_cache_perf_models[(MemComponent::component_t)i] = CachePerfModel::create(
+                   cache_parameters[(MemComponent::component_t)i].perf_model_type,
+                   cache_parameters[(MemComponent::component_t)i].data_access_time,
+                   cache_parameters[(MemComponent::component_t)i].tags_access_time
+                   );
+       }
+
+   }
 
 
    if (m_dram_cntlr_present)

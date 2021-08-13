@@ -3,13 +3,30 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated />
+  </component>
   <component name="CMakeSettings">
     <configurations>
       <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="35db47bf-841d-4485-838e-a840adbcd84a" name="Changes" comment="" />
+    <list default="true" id="35db47bf-841d-4485-838e-a840adbcd84a" name="Changes" comment="Initial code">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/core/memory_subsystem/parametric_dram_directory_msi/cache_cntlr.cc" beforeDir="false" afterPath="$PROJECT_DIR$/common/core/memory_subsystem/parametric_dram_directory_msi/cache_cntlr.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/core/memory_subsystem/parametric_dram_directory_msi/cache_cntlr.h" beforeDir="false" afterPath="$PROJECT_DIR$/common/core/memory_subsystem/parametric_dram_directory_msi/cache_cntlr.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/core/memory_subsystem/parametric_dram_directory_msi/memory_manager.cc" beforeDir="false" afterPath="$PROJECT_DIR$/common/core/memory_subsystem/parametric_dram_directory_msi/memory_manager.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/misc/subsecond_time.h" beforeDir="false" afterPath="$PROJECT_DIR$/common/misc/subsecond_time.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/performance_model/cache_perf_model.cc" beforeDir="false" afterPath="$PROJECT_DIR$/common/performance_model/cache_perf_model.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/performance_model/cache_perf_model.h" beforeDir="false" afterPath="$PROJECT_DIR$/common/performance_model/cache_perf_model.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/performance_model/cache_perf_model_parallel.h" beforeDir="false" afterPath="$PROJECT_DIR$/common/performance_model/cache_perf_model_parallel.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/performance_model/cache_perf_model_sequential.h" beforeDir="false" afterPath="$PROJECT_DIR$/common/performance_model/cache_perf_model_sequential.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/docker/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pin/lite/memory_modeling.cc" beforeDir="false" afterPath="$PROJECT_DIR$/pin/lite/memory_modeling.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/fft/fft" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -18,10 +35,43 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
   <component name="MakefileLocalSettings">
+    <option name="availableProjects">
+      <map>
+        <entry>
+          <key>
+            <ExternalProjectPojo>
+              <option name="name" value="sniper" />
+              <option name="path" value="$PROJECT_DIR$" />
+            </ExternalProjectPojo>
+          </key>
+          <value>
+            <list>
+              <ExternalProjectPojo>
+                <option name="name" value="sniper" />
+                <option name="path" value="$PROJECT_DIR$" />
+              </ExternalProjectPojo>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="projectSyncType">
       <map>
         <entry key="$PROJECT_DIR$" value="RE_IMPORT" />
@@ -42,6 +92,23 @@
     <property name="cf.first.check.clang-format" value="false" />
     <property name="cidr.known.project.marker" value="true" />
   </component>
+  <component name="RunManager">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="NimRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="nim.task.build.to.cache" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -51,7 +118,36 @@
       <option name="presentableId" value="Default" />
       <updated>1628749132604</updated>
       <workItem from="1628749134480" duration="6000" />
+      <workItem from="1628749157626" duration="16059000" />
+      <workItem from="1628850812939" duration="4956000" />
     </task>
+    <task id="LOCAL-00001" summary="Initial code">
+      <created>1628749367962</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1628749367962</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial code" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initial code" />
   </component>
 </project>
