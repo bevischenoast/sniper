@@ -154,6 +154,8 @@ CacheCntlr::CacheCntlr(MemComponent::component_t mem_component,
    m_shmem_perf_global(NULL),
    m_shmem_perf_model(shmem_perf_model)
 {
+
+    std::cout  << "Cache_Cntl obj" << std::endl;
    m_core_id_master = m_core_id - m_core_id % m_shared_cores;
    Sim()->getStatsManager()->logTopology(name, core_id, m_core_id_master);
 
@@ -853,24 +855,39 @@ CacheCntlr::processShmemReqFromPrevCache(CacheCntlr* requester, Core::mem_op_t m
          }
          else
          {
-             if(m_mem_component == MemComponent::L3_CACHE && mem_op_type == Core::WRITE){
-                 //TODO: For test ONLY !!!
-                 // This assignment statement needs to be removed later
-                 // Note that call core->accessMemory (see common/system/syscall_server.cc line 59 for a usage example)
-                 // can get readl data.
-                 bool isFastWrite = false;
+           //Below statement "getMemoryManager()"  is only used for test wether block was propelly implemented
+           //getMemoryManager()->incrElapsedTime(m_mem_component, CachePerfModel::ACCESS_CACHE_DATA_AND_TAGS, ShmemPerfModel::_USER_THREAD);
+
+             if(m_mem_component == MemComponent::L3_CACHE){
+                 SubsecondTime t_now = getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_USER_THREAD);
+                 if(mem_op_type == Core::WRITE){
+                     //TODO: For test ONLY !!!
+                     // This assignment statement needs to be removed later
+                     // Note that call core->accessMemory (see common/system/syscall_server.cc line 59 for a usage example)
+                     // can get readl data.
+                     bool isFastWrite = false;
                      if(isFastWrite){
-                         getMemoryManager()->incrElapsedTime(m_mem_component, CachePerfModel::WRITE_CACHE_DATA_FAST, ShmemPerfModel::_USER_THREAD);
+                         CachePerfModel::CacheAccess_t access_type = CachePerfModel::WRITE_CACHE_DATA_FAST;
+                         SubsecondTime latency = updateBankAvailableCycle(m_mem_component, mem_op_type, address,t_now, access_type);
+                         getMemoryManager()->incrElapsedTime(latency , ShmemPerfModel::_USER_THREAD);
                      }else{
-                         getMemoryManager()->incrElapsedTime(m_mem_component, CachePerfModel::WRITE_CACHE_DATA_SLOW, ShmemPerfModel::_USER_THREAD);
+                         CachePerfModel::CacheAccess_t access_type = CachePerfModel::WRITE_CACHE_DATA_SLOW;
+                         SubsecondTime latency  = updateBankAvailableCycle(m_mem_component, mem_op_type, address,t_now, access_type);
+                         getMemoryManager()->incrElapsedTime(latency, ShmemPerfModel::_USER_THREAD);
                      }
-             }else{
-                 getMemoryManager()->incrElapsedTime(m_mem_component, CachePerfModel::ACCESS_CACHE_DATA_AND_TAGS, ShmemPerfModel::_USER_THREAD);
+                 } else if(mem_op_type == Core::READ){
+                     CachePerfModel::CacheAccess_t access_type = CachePerfModel::ACCESS_CACHE_DATA_AND_TAGS;
+                     SubsecondTime latency  = updateBankAvailableCycle(m_mem_component, mem_op_type, address,t_now, access_type);
+                     getMemoryManager()->incrElapsedTime(latency, ShmemPerfModel::_USER_THREAD);
+                 }
              }
+             else{
+                 getMemoryManager()->incrElapsedTime(m_mem_component, CachePerfModel::ACCESS_CACHE_DATA_AND_TAGS, ShmemPerfModel::_USER_THREAD);
+             } 
          }
       }
 
-      if (mem_op_type != Core::READ) // write that hits
+      if (mem_op_type != Core::READ) // write that hit
       {
          /* Invalidate/flush in previous levels */
          SubsecondTime latency = SubsecondTime::Zero();
@@ -1017,7 +1034,16 @@ CacheCntlr::processShmemReqFromPrevCache(CacheCntlr* requester, Core::mem_op_t m
                insertCacheBlock(address, mem_op_type == Core::READ ? CacheState::SHARED : CacheState::MODIFIED, data_buf, m_core_id, ShmemPerfModel::_USER_THREAD);
                if (isPrefetch != Prefetch::NONE)
                   getCacheBlockInfo(address)->setOption(CacheBlockInfo::PREFETCH);
-
+                // Update bank available cycle
+                SubsecondTime t_now = getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_USER_THREAD);
+                bool isFastWrite = false;
+                if(isFastWrite){
+                    CachePerfModel::CacheAccess_t access_type = CachePerfModel::WRITE_CACHE_DATA_FAST;
+                    updateBankAvailableCycle(m_mem_component, mem_op_type, address,t_now, access_type);
+                }else{
+                    CachePerfModel::CacheAccess_t access_type = CachePerfModel::WRITE_CACHE_DATA_SLOW;
+                    updateBankAvailableCycle(m_mem_component, mem_op_type, address,t_now, access_type);
+                } 
                updateUncoreStatistics(hit_where, getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_USER_THREAD));
             }
          }
@@ -2316,4 +2342,112 @@ CacheCntlr::getNetworkThreadSemaphore()
    return m_network_thread_sem;
 }
 
+
+//TODO: Finish everything about bank
+SubsecondTime
+CacheCntlr::updateBankAvailableCycle(MemComponent::component_t mem_component, Core::mem_op_t mem_op_type,
+                                     IntPtr address, SubsecondTime t_now, CachePerfModel::CacheAccess_t access_type) {
+
+    //static bool uninitialized = true;
+    /*
+    if(uninitialized){
+        uninitialized = false;
+        for(uint32_t i = 0;i<4;i++){
+           //Bank[i] = new Bank;
+            //std::memcpy(Bank[i]->available_cycle, SubsecondTime::Zero(), sizeof Bank[i]->available_cycle);
+           Bank[i]->available_cycle = SubsecondTime::Zero();
+        }
+    }
+     */
+
+    //bank_ptr->available_cycle = SubsecondTime::Zero();
+
+    uint8_t bank_index = ( (address >> 6 ) / 64) % 4;
+    struct Bank* bank;
+    switch(bank_index){
+        case 0:
+            bank = &bank_0;
+            break;
+        case 1:
+            bank = &bank_1;
+            break;
+        case 2:
+            bank = &bank_2;
+            break;
+        case 3:
+            bank = &bank_3;
+            break;
+        default:
+            break;
+    }
+    //MemoryManager* mm = new MemoryManager();
+    SubsecondTime latency = SubsecondTime::Zero();
+
+    if (mem_op_type == Core::WRITE) {
+        if (bank->available_cycle > t_now) {
+            bank->available_cycle = bank->available_cycle - t_now + getMemoryManager()->getCost(mem_component, access_type);
+        } else {
+            bank->available_cycle = getMemoryManager()->getCost(mem_component, access_type);
+        }
+        latency = getMemoryManager()->getCost(mem_component, CachePerfModel::ACCESS_CACHE_TAGS);
+    } else if (mem_op_type == Core::READ) {
+        if (bank->available_cycle > t_now) {
+            latency = bank->available_cycle - t_now + getMemoryManager()->getCost(mem_component, access_type);
+        } else {
+            latency = getMemoryManager()->getCost(mem_component, access_type);
+        }
+    }
+    return latency;
+}
+
+
+/*
+SubsecondTime*
+CacheCntlr::updateBankAvailableCycle(MemComponent::component_t mem_component,Core::mem_op_t mem_op_type, IntPtr address,SubsecondTime t_now, CachePerfModel::CacheAccess_t access_type )
+{
+    Bank* Bank[4];
+    uint8_t bank_index  =  (address / 64) % 4;
+    SubsecondTime immediate_available_cycle = m_cache_perf_models[mem_component]->getLatency(access_type);
+    SubsecondTime postponed_available_cycle = Bank[bank_index]->available_cycle - t_now + m_cache_perf_models[mem_component]->getLatency(access_type);
+
+
+    if(mem_op_type == Core::WRITE){
+        //Bank available cycle is the largest available cycle in buffer.
+        Bank[bank_index]->available_cycle = Bank[bank_index]->write_buffer.top();
+        if(Bank[bank_index]->write_buffer.size() < 8){
+            //Write buffer is not full
+            //Copy new block information to buffer entry:
+            Bank[bank_index]->write_buffer->address = address;
+
+            if(Bank[bank_index]->available_cycle > t_now){
+                 = postponed_available_cycle;
+                Bank[bank_index]->write_buffer->buffed_block_available_cycle = postponed_available_cycle;
+                Bank[bank_index]->write_buffer.push(Bank[bank_index]->write_buffer);
+            }
+            else{
+                Bank[bank_index]->available_cycle = immediate_available_cycle;
+                Bank[bank_index]->write_buffer->buffed_block_available_cycle = immediate_available_cycle;
+                Bank[bank_index]->write_buffer.push(Bank[bank_index]->write_buffer);
+            }
+            return m_cache_perf_models[mem_component]->getLatency(CachePerfModel::ACCESS_CACHE_TAGS);
+
+
+        }else{
+            //Write buffer is full
+            if(Bank[bank_index]->available_cycle > t_now){
+                Bank[bank_index]->available_cycle = postponed_available_cycle;
+            }
+            else{
+                Bank[bank_index]->available_cycle = immediate_available_cycle;
+            }
+            return m_cache_perf_models[mem_component]->getLatency(CachePerfModel::ACCESS_CACHE_TAGS);
+        }
+    } else if(mem_op_type == Core::READ){
+        if(Bank[bank_index]->available_cycle > t_now){
+            return postponed_available_cycle;
+        }else{
+            return immediate_available_cycle;
+        }
+    }
+*/
 }

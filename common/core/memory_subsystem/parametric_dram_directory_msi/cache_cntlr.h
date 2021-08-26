@@ -45,6 +45,7 @@ class ShmemPerf;
 
 namespace ParametricDramDirectoryMSI
 {
+
    class Transition
    {
       public:
@@ -169,6 +170,10 @@ namespace ParametricDramDirectoryMSI
       SubsecondTime t_issue, t_complete;
    };
    typedef std::unordered_map<IntPtr, MshrEntry> Mshr;
+
+
+
+
 
    class CacheMasterCntlr
    {
@@ -374,7 +379,37 @@ namespace ParametricDramDirectoryMSI
 
          CacheCntlr* lastLevelCache(void);
 
+
+
       public:
+       ///////////////////////////////////////////////////
+       //TODO: Finish everything about bank
+       struct Bank{
+           SubsecondTime available_cycle = SubsecondTime::Zero() ;
+           //uint32_t buffed_block_count;
+           //std::priority_queue<Write_Buffer*, vector<Write_Buffer*>, DescendingBuffedBlockAvailableCycle> write_buffer;
+          // Bank(SubsecondTime available_cycle){this->available_cycle = available_cycle;}
+       };
+       //Bank** bank[4];
+       struct Bank bank_0;
+       struct Bank bank_1;
+       struct Bank bank_2;
+       struct Bank bank_3;
+       SubsecondTime updateBankAvailableCycle(MemComponent::component_t mem_component,Core::mem_op_t mem_op_type, IntPtr address,SubsecondTime t_now,CachePerfModel::CacheAccess_t access_type);
+       /*
+                struct Write_Buffer{
+                    IntPtr address = NULL;
+                    SubsecondTime buffed_block_available_cycle = 0;
+                };
+
+                struct DescendingBuffedBlockAvailableCycle{
+                    bool operator() ( Write_Buffer* a, Write_Buffer* b) const{
+                        return a->buffed_block_available_cycle > b->buffed_block_available_cycle;
+                    }
+                };
+       */
+
+       ///////////////////////////////////////////////////
 
          CacheCntlr(MemComponent::component_t mem_component,
                String name,
